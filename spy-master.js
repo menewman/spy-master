@@ -1,5 +1,5 @@
 SpyMaster = (function() {
-  var defaultTag = 'SpyLogger';
+  var defaultTag = 'SpyMaster';
 
   var spyOnOwn = function(obj, tag) {
     tag = tag || defaultTag;
