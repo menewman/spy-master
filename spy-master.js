@@ -18,10 +18,11 @@ SpyMaster = (function() {
         obj[key] = function() {
           var args = Array.prototype.slice.call(arguments);
 
-          console.log(prefix + key + " / " + args.length + " arguments");
+          console.group(prefix + key + " / " + args.length + " arguments");
           if (args.length) {
             console.dir(args);
           }
+          console.groupEnd();
           return originalFunc.apply(this, args);
         };
       });
