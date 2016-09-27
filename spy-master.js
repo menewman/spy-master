@@ -4,9 +4,11 @@ SpyMaster = (function() {
   // obj          - an object / class instance to spy on
   // tag          - an optional tag to use when logging to the console
   // keysToIgnore - an object containing keys to ignore, like { foo: true, bar: true }
-  function spyOnOwn(obj, tag, keysToIgnore) {
+  // pauseOn      - an object containing functions we should pause on (via debugger)
+  function spyOnOwn(obj, tag, keysToIgnore, pauseOn) {
     tag = tag || defaultTag;
     keysToIgnore = keysToIgnore || {};
+    pauseOn = pauseOn || {};
     var prefix = tag + ': ';
 
     (Object.keys(obj) || [])
@@ -15,6 +17,7 @@ SpyMaster = (function() {
       })
       .forEach(function(key) {
         var originalFunc = obj[key];
+        var shouldPause = pauseOn[key];
         obj[key] = function() {
           var args = Array.prototype.slice.call(arguments);
 
@@ -23,19 +26,23 @@ SpyMaster = (function() {
             console.dir(args);
           }
           console.groupEnd();
+
+          if (shouldPause) {
+            debugger; // the consumer asked us to pause on this key
+          }
           return originalFunc.apply(this, args);
         };
       });
   }
 
-  function spyOnPrototype(obj, tag, keysToIgnore) {
+  function spyOnPrototype(obj, tag, keysToIgnore, pauseOn) {
     var proto = Object.getPrototypeOf(obj);
-    spyOnOwn(proto, tag, keysToIgnore);
+    spyOnOwn(proto, tag, keysToIgnore, pauseOn);
   }
 
-  function infiltrate(obj, tag, keysToIgnore) {
-    spyOnOwn(obj, tag, keysToIgnore);
-    spyOnPrototype(obj, tag, keysToIgnore);
+  function infiltrate(obj, tag, keysToIgnore, pauseOn) {
+    spyOnOwn(obj, tag, keysToIgnore, pauseOn);
+    spyOnPrototype(obj, tag, keysToIgnore, pauseOn);
   }
 
   return {
